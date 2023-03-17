@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  Platform,
 } from 'react-native';
 import { Camera, CameraCapturedPicture, CameraType } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,17 +17,14 @@ import { useState } from 'react';
 const CameraCustom: FC<{}> = () => {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
-
+  const insets = useSafeAreaInsets();
   const [pictures, setPictures] = useState<CameraCapturedPicture[]>([]);
   const { width, height: heightWindow } = useWindowDimensions();
   const cameraRef = useRef<Camera | null>();
-  const insets = useSafeAreaInsets();
-  const height = Math.round((width * 16) / 9);
+  const isiOS = Platform.OS === 'ios';
+  const height = isiOS ? heightWindow * 0.8 : Math.round((width * 16) / 9);
 
-  const picturesHeight =
-    heightWindow - height < 100
-      ? 100
-      : heightWindow - height + insets.bottom + insets.top;
+  const picturesHeight = heightWindow - height;
 
   if (!permission) {
     // Camera permissions are still loading
@@ -73,7 +71,7 @@ const CameraCustom: FC<{}> = () => {
         style={[
           styles.camera,
           {
-            height: height - picturesHeight,
+            height: height,
           },
         ]}
         type={type}>
